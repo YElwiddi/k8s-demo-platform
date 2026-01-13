@@ -1,0 +1,88 @@
+global:
+  environment: staging
+  domain: staging.nikko-demo.io
+
+frontend:
+  enabled: true
+  replicaCount: 2
+  image:
+    tag: "2.4.1"
+  ingress:
+    hosts:
+      - host: app.staging.nikko-demo.io
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: frontend-staging-tls
+        hosts:
+          - app.staging.nikko-demo.io
+  resources:
+    limits:
+      cpu: 150m
+      memory: 192Mi
+    requests:
+      cpu: 75m
+      memory: 96Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+
+backend-api:
+  enabled: true
+  replicaCount: 2
+  image:
+    tag: "3.2.0"
+  ingress:
+    hosts:
+      - host: api.staging.nikko-demo.io
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: backend-staging-tls
+        hosts:
+          - api.staging.nikko-demo.io
+  resources:
+    limits:
+      cpu: 400m
+      memory: 384Mi
+    requests:
+      cpu: 200m
+      memory: 192Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+  env:
+    - name: GIN_MODE
+      value: "release"
+    - name: LOG_LEVEL
+      value: "info"
+
+redis:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 5Gi
+  resources:
+    limits:
+      cpu: 300m
+      memory: 512Mi
+    requests:
+      cpu: 75m
+      memory: 128Mi
+
+postgresql:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 20Gi
+  resources:
+    limits:
+      cpu: 750m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 384Mi

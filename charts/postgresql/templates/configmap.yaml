@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "postgresql.fullname" . }}-config
+  labels:
+    {{- include "postgresql.labels" . | nindent 4 }}
+data:
+  postgresql.conf: |
+    listen_addresses = '*'
+    port = 5432
+    max_connections = {{ .Values.config.maxConnections }}
+    shared_buffers = {{ .Values.config.sharedBuffers }}
+    effective_cache_size = {{ .Values.config.effectiveCacheSize }}
+    maintenance_work_mem = {{ .Values.config.maintenanceWorkMem }}
+    checkpoint_completion_target = {{ .Values.config.checkpointCompletionTarget }}
+    wal_buffers = {{ .Values.config.walBuffers }}
+    default_statistics_target = {{ .Values.config.defaultStatisticsTarget }}
+    random_page_cost = {{ .Values.config.randomPageCost }}
+    effective_io_concurrency = {{ .Values.config.effectiveIOConcurrency }}
+    work_mem = {{ .Values.config.workMem }}
+    min_wal_size = {{ .Values.config.minWalSize }}
+    max_wal_size = {{ .Values.config.maxWalSize }}
+    log_destination = 'stderr'
+    logging_collector = off
+    log_statement = 'mod'
+    log_duration = on
+    log_min_duration_statement = 1000
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "postgresql.fullname" . }}-init
+  labels:
+    {{- include "postgresql.labels" . | nindent 4 }}
+data:
+  init.sql: |
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
+
+    CREATE TABLE IF NOT EXISTS users (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        email VARCHAR(255) UNIQUE NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        token VARCHAR(512) NOT NULL,
+        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+
+    CREATE INDEX idx_sessions_user_id ON sessions(user_id);
+    CREATE INDEX idx_sessions_token ON sessions(token);
+    CREATE INDEX idx_users_email ON users(email);

@@ -1,0 +1,83 @@
+global:
+  environment: development
+  domain: dev.nikko-demo.io
+
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: "latest"
+  ingress:
+    hosts:
+      - host: app.dev.nikko-demo.io
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: frontend-dev-tls
+        hosts:
+          - app.dev.nikko-demo.io
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  autoscaling:
+    enabled: false
+
+backend-api:
+  enabled: true
+  replicaCount: 1
+  image:
+    tag: "latest"
+  ingress:
+    hosts:
+      - host: api.dev.nikko-demo.io
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: backend-dev-tls
+        hosts:
+          - api.dev.nikko-demo.io
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: false
+  env:
+    - name: GIN_MODE
+      value: "debug"
+    - name: LOG_LEVEL
+      value: "debug"
+
+redis:
+  enabled: true
+  persistence:
+    enabled: false
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+postgresql:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 5Gi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi

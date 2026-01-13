@@ -1,0 +1,13 @@
+apiVersion: v2
+name: postgresql
+version: 1.0.0
+appVersion: "16.1"
+description: PostgreSQL database for persistent storage
+type: application
+keywords:
+  - postgresql
+  - database
+  - sql
+maintainers:
+  - name: Nikko
+    email: nikko@example.com

@@ -1,0 +1,14 @@
+apiVersion: v2
+name: frontend
+version: 1.0.0
+appVersion: "2.4.1"
+description: React frontend application with nginx
+type: application
+keywords:
+  - frontend
+  - react
+  - nginx
+  - web
+maintainers:
+  - name: Nikko
+    email: nikko@example.com

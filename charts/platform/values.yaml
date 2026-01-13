@@ -1,0 +1,76 @@
+global:
+  environment: production
+  domain: nikko-demo.io
+  imageRegistry: ghcr.io/nikko-demo
+
+frontend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: ghcr.io/nikko-demo/frontend
+    tag: "2.4.1"
+  ingress:
+    enabled: true
+    hosts:
+      - host: app.nikko-demo.io
+        paths:
+          - path: /
+            pathType: Prefix
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+backend-api:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: ghcr.io/nikko-demo/backend-api
+    tag: "3.2.0"
+  ingress:
+    enabled: true
+    hosts:
+      - host: api.nikko-demo.io
+        paths:
+          - path: /
+            pathType: Prefix
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+redis:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+postgresql:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 50Gi
+  auth:
+    database: apidb
+    username: apiuser
+    password: secretpass123
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi

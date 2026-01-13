@@ -1,0 +1,99 @@
+global:
+  environment: production
+  domain: nikko-demo.io
+
+frontend:
+  enabled: true
+  replicaCount: 3
+  image:
+    tag: "2.4.1"
+  ingress:
+    hosts:
+      - host: app.nikko-demo.io
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: frontend-prod-tls
+        hosts:
+          - app.nikko-demo.io
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+backend-api:
+  enabled: true
+  replicaCount: 3
+  image:
+    tag: "3.2.0"
+  ingress:
+    hosts:
+      - host: api.nikko-demo.io
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: backend-prod-tls
+        hosts:
+          - api.nikko-demo.io
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 65
+    targetMemoryUtilizationPercentage: 75
+  env:
+    - name: GIN_MODE
+      value: "release"
+    - name: LOG_LEVEL
+      value: "info"
+    - name: LOG_FORMAT
+      value: "json"
+
+redis:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  config:
+    maxmemory: 768mb
+
+postgresql:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 50Gi
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  backup:
+    enabled: true
+    schedule: "0 2 * * *"

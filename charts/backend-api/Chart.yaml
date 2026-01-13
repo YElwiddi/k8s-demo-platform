@@ -1,0 +1,14 @@
+apiVersion: v2
+name: backend-api
+version: 1.0.0
+appVersion: "3.2.0"
+description: Go backend API service
+type: application
+keywords:
+  - backend
+  - api
+  - golang
+  - rest
+maintainers:
+  - name: Nikko
+    email: nikko@example.com

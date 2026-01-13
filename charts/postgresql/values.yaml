@@ -1,0 +1,119 @@
+replicaCount: 1
+
+image:
+  repository: postgres
+  tag: "16.1-alpine"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  name: postgresql-sa
+  annotations: {}
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9187"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 70
+  runAsGroup: 70
+  fsGroup: 70
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 5432
+  targetPort: 5432
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+livenessProbe:
+  exec:
+    command:
+      - pg_isready
+      - -U
+      - $(POSTGRES_USER)
+      - -d
+      - $(POSTGRES_DB)
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+readinessProbe:
+  exec:
+    command:
+      - pg_isready
+      - -U
+      - $(POSTGRES_USER)
+      - -d
+      - $(POSTGRES_DB)
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+persistence:
+  enabled: true
+  storageClass: gp3
+  accessMode: ReadWriteOnce
+  size: 50Gi
+
+auth:
+  database: apidb
+  username: apiuser
+  password: secretpass123
+  postgresPassword: adminpass456
+
+config:
+  maxConnections: 200
+  sharedBuffers: 512MB
+  effectiveCacheSize: 1536MB
+  maintenanceWorkMem: 128MB
+  checkpointCompletionTarget: 0.9
+  walBuffers: 16MB
+  defaultStatisticsTarget: 100
+  randomPageCost: 1.1
+  effectiveIOConcurrency: 200
+  workMem: 2621kB
+  minWalSize: 1GB
+  maxWalSize: 4GB
+
+exporter:
+  enabled: true
+  image:
+    repository: prometheuscommunity/postgres-exporter
+    tag: v0.15.0
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+backup:
+  enabled: true
+  schedule: "0 2 * * *"
+  retention: 7
+  s3Bucket: nikko-demo-db-backups
